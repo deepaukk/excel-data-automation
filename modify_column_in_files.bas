@@ -3,41 +3,47 @@ Sub ModifyColumnInFiles()
     Dim sourceFolder As String
     Dim destinationFolder As String
     Dim fileName As String
-    Dim workbook As Workbook
+    Dim wb As Workbook
     Dim lastTwoDigits As String
+    Dim fileBaseName As String
 
+    ' Select source folder
     With Application.FileDialog(msoFileDialogFolderPicker)
         .Title = "Select Source Folder"
 
-        If .Show = -1 Then
-            sourceFolder = .SelectedItems(1) & "\"
-        Else
-            Exit Sub
-        End If
+        If .Show <> -1 Then Exit Sub
+
+        sourceFolder = .SelectedItems(1) & "\"
     End With
 
+    ' Select destination folder
     With Application.FileDialog(msoFileDialogFolderPicker)
         .Title = "Select Destination Folder"
 
-        If .Show = -1 Then
-            destinationFolder = .SelectedItems(1) & "\"
-        Else
-            Exit Sub
-        End If
+        If .Show <> -1 Then Exit Sub
+
+        destinationFolder = .SelectedItems(1) & "\"
     End With
 
+    ' Process all Excel files in the source folder
     fileName = Dir(sourceFolder & "*.xlsx")
 
     Do While fileName <> ""
 
-        Set workbook = Workbooks.Open(sourceFolder & fileName)
+        Set wb = Workbooks.Open(sourceFolder & fileName)
 
-        lastTwoDigits = Right(Left(fileName, InStrRev(fileName, ".") - 1), 2)
+        ' Get the filename without the extension
+        fileBaseName = Left(fileName, InStrRev(fileName, ".") - 1)
 
-        workbook.ActiveSheet.Range("B2:B431").Value = "100100" & lastTwoDigits
+        ' Extract the last two characters from the filename
+        lastTwoDigits = Right(fileBaseName, 2)
 
-        workbook.SaveAs destinationFolder & fileName
-        workbook.Close SaveChanges:=False
+        ' Update the required range
+        wb.ActiveSheet.Range("B2:B431").Value = "100100" & lastTwoDigits
+
+        ' Save the processed workbook in the destination folder
+        wb.SaveAs destinationFolder & fileName
+        wb.Close SaveChanges:=False
 
         fileName = Dir
 
